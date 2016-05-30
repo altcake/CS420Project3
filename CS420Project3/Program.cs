@@ -15,6 +15,7 @@ namespace CS420Project3
         public Board()
         {
             board = new int[8, 8];
+            moveList = new List<string>();
         }
 
         public Board(Board oldBoard)
@@ -23,12 +24,12 @@ namespace CS420Project3
             this.moveList = oldBoard.getMoveList();
         }
 
-        void printMoveList()
+        public void printMoveList()
         {
             Console.WriteLine("Player   Opponent");
             for (int i = 0; i < moveList.Count; i += 2)
             {
-                Console.WriteLine(moveList[i] + "   " + moveList[i + 1]);
+                Console.WriteLine(moveList[i] + "       " + moveList[i + 1]);
             }
         }
 
@@ -55,6 +56,7 @@ namespace CS420Project3
                 }
                 Console.WriteLine();
             }
+            Console.WriteLine();
         }
 
         public int[,] getBoard()
@@ -67,11 +69,22 @@ namespace CS420Project3
             return moveList;
         }
 
-/*        public bool setPiece(int piece, string location)
+        public bool setPiece(int piece, string location)
         {
             bool success = false;
-            if(board[(int)((Coordinates)Enum.Parse(typeof(Coordinates), location.ElementAt(0))
-        }*/
+            if(board[(int)((Coordinates)Enum.Parse(typeof(Coordinates), location[0].ToString().ToUpper())), ((int)Char.GetNumericValue(location[1])) - 1] == 0)
+            {
+                board[(int)((Coordinates)Enum.Parse(typeof(Coordinates), location[0].ToString().ToUpper())), ((int)Char.GetNumericValue(location[1])) - 1] = piece;
+                string move = location[0].ToString().ToUpper() + location[1];
+                moveList.Add(move);
+                success = true;
+            }
+            else
+            {
+                Console.WriteLine("Placement failed; Space already used.");
+            }
+            return success;
+        }
     }
     class Program
     {
@@ -80,7 +93,13 @@ namespace CS420Project3
         {
             Board testBoard = new Board();
             testBoard.printBoard();
-            Thread.Sleep(5000);
+            testBoard.setPiece(1, "D5");
+            testBoard.setPiece(2, "E5");
+            testBoard.setPiece(1, "d6");
+            testBoard.setPiece(2, "d7");
+            testBoard.printBoard();
+            testBoard.printMoveList();
+            Thread.Sleep(20000);
         }
     }
 }
