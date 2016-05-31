@@ -139,6 +139,7 @@ namespace CS420Project3
                 Coordinate temp = new Coordinate(x, y);
                 takenSpaces.Add(temp);
                 moveList.Add(move);
+                success = true;
                 int winner = checkWin(temp);
                 printWinner(winner);
                 nextSpaces.RemoveAll(item => item.x == x && item.y == y);
@@ -181,8 +182,6 @@ namespace CS420Project3
                         nextSpaces.Add(new Coordinate(x1, y1));
                     }
                 }
-
-                success = true;
             }
             else
             {
@@ -198,10 +197,9 @@ namespace CS420Project3
             int count = 0;
 
             // Horizontal check
-
+            tempWinner = board[lastMove.x, 0];
             for (int i = 0; i < size; i++)
             {
-                tempWinner = board[lastMove.x, i];
                 if (board[lastMove.x, i] == tempWinner && tempWinner != 0)
                 {
                     count++;
@@ -221,10 +219,9 @@ namespace CS420Project3
 
             }
             //Vertical check
-
+            tempWinner = board[0, lastMove.y];
             for (int i = 0; i < size; i++)
             {
-                tempWinner = board[i, lastMove.y];
                 if (board[i, lastMove.y] == tempWinner && tempWinner != 0)
                 {
                     count++;
@@ -260,7 +257,7 @@ namespace CS420Project3
             }
             else
             {
-                Console.WriteLine("No winner detected\n");
+ //               Console.WriteLine("No winner detected\n");
             }
         }
     }
