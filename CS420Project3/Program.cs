@@ -23,6 +23,7 @@ namespace CS420Project3
     class Board
     {
         private int[,] board;
+        private int size { get; }
         private List<string> moveList;
         private List<Coordinate> takenSpaces;
         private List<Coordinate> nextSpaces;
@@ -30,6 +31,7 @@ namespace CS420Project3
         public Board()
         {
             board = new int[8, 8];
+            size = (int)Math.Sqrt(board.Length);
             moveList = new List<string>();
             takenSpaces = new List<Coordinate>();
             nextSpaces = new List<Coordinate>();
@@ -38,6 +40,7 @@ namespace CS420Project3
         public Board(Board oldBoard)
         {
             this.board = oldBoard.getBoard();
+            this.size = oldBoard.size;
             this.moveList = oldBoard.getMoveList();
             this.takenSpaces = oldBoard.getTakenSpaces();
             this.nextSpaces = oldBoard.getNextSpaces();
@@ -58,7 +61,7 @@ namespace CS420Project3
             foreach (string coordinateName in Enum.GetNames(typeof(Coordinates)))
             {
                 Console.Write("{0} ", coordinateName);
-                for (int i = 0; i < Math.Sqrt(board.Length); i++)
+                for (int i = 0; i < size; i++)
                 {
                     if (board[(int)((Coordinates)Enum.Parse(typeof(Coordinates), coordinateName)), i] == 1)
                     {
@@ -98,11 +101,12 @@ namespace CS420Project3
             string stringSpace;
             Console.WriteLine("Taken Spaces:");
             Console.WriteLine("-------------");
-            foreach(Coordinate space in takenSpaces)
+            foreach (Coordinate space in takenSpaces)
             {
                 stringSpace = Enum.GetName(typeof(Coordinates), space.x) + (space.y + 1);
                 Console.WriteLine(stringSpace);
             }
+            Console.WriteLine();
         }
 
         public List<Coordinate> getNextSpaces()
@@ -120,6 +124,7 @@ namespace CS420Project3
                 stringSpace = Enum.GetName(typeof(Coordinates), space.x) + (space.y + 1);
                 Console.WriteLine(stringSpace);
             }
+            Console.WriteLine();
         }
 
         public bool setPiece(int piece, string location)
@@ -134,13 +139,14 @@ namespace CS420Project3
                 Coordinate temp = new Coordinate(x, y);
                 takenSpaces.Add(temp);
                 moveList.Add(move);
+                int winner = checkWin(temp);
                 nextSpaces.RemoveAll(item => item.x == x && item.y == y);
                 int x1 = x;
                 int y1 = y;
 
                 x1 = x;
                 y1 = y + 1;
-                if(y1 < Math.Sqrt(board.Length))
+                if (y1 < size)
                 {
                     if (board[x1, y1] == 0)
                     {
@@ -158,7 +164,7 @@ namespace CS420Project3
                 }
                 x1 = x + 1;
                 y1 = y;
-                if (x1 < Math.Sqrt(board.Length))
+                if (x1 < size)
                 {
                     if (board[x1, y1] == 0)
                     {
@@ -183,6 +189,71 @@ namespace CS420Project3
             }
             return success;
         }
+
+        public int checkWin(Coordinate lastMove)
+        {
+            int winner = 0;
+            int tempWinner = 0;
+            int count = 0;
+
+            // Horizontal check
+
+            for (int i = 0; i < size; i++)
+            {
+                tempWinner = board[lastMove.x, i];
+                if (board[lastMove.x, i] == tempWinner && tempWinner != 0)
+                {
+                    count++;
+                }
+
+                else
+                {
+                    count = 1;
+                    tempWinner = board[lastMove.x, i];
+                }
+
+                if (count >= 4 && tempWinner != 0)
+                {
+                    winner = tempWinner;
+                }
+
+            }
+            //Vertical check
+
+            for (int i = 0; i < size; i++)
+            {
+                tempWinner = board[i, lastMove.y];
+                if (board[i, lastMove.y] == tempWinner && tempWinner != 0)
+                {
+                    count++;
+                }
+
+                else
+                {
+                    count = 1;
+                    tempWinner = board[i, lastMove.y];
+                }
+
+                if (count >= 4 && tempWinner != 0)
+                {
+                    winner = tempWinner;
+                }
+            }
+
+            if(winner != 0)
+            {
+                if(winner == 1)
+                {
+                    Console.WriteLine("X is the winner!");
+                }
+                else // winner == 2, O wins
+                {
+                    Console.WriteLine("O is the winner!");
+                }
+
+            }
+            return winner;
+        }
     }
     class Program
     {
@@ -201,6 +272,8 @@ namespace CS420Project3
             testBoard.printBoard();
             testBoard.printNextSpaces();
             testBoard.setPiece(2, "d7");
+            testBoard.setPiece(1, "d4");
+            testBoard.setPiece(1, "d3");
             testBoard.printBoard();
             testBoard.printMoveList();
             testBoard.printTakenSpaces();
