@@ -140,6 +140,7 @@ namespace CS420Project3
                 takenSpaces.Add(temp);
                 moveList.Add(move);
                 int winner = checkWin(temp);
+                printWinner(winner);
                 nextSpaces.RemoveAll(item => item.x == x && item.y == y);
                 int x1 = x;
                 int y1 = y;
@@ -215,6 +216,7 @@ namespace CS420Project3
                 if (count >= 4 && tempWinner != 0)
                 {
                     winner = tempWinner;
+                    break;
                 }
 
             }
@@ -237,22 +239,29 @@ namespace CS420Project3
                 if (count >= 4 && tempWinner != 0)
                 {
                     winner = tempWinner;
+                    break;
                 }
             }
+            return winner;
+        }
 
-            if(winner != 0)
+        public void printWinner(int winner)
+        {
+            if (winner != 0)
             {
-                if(winner == 1)
+                if (winner == 1)
                 {
-                    Console.WriteLine("X is the winner!");
+                    Console.WriteLine("X is the winner!\n");
                 }
                 else // winner == 2, O wins
                 {
-                    Console.WriteLine("O is the winner!");
+                    Console.WriteLine("O is the winner!\n");
                 }
-
             }
-            return winner;
+            else
+            {
+                Console.WriteLine("No winner detected\n");
+            }
         }
     }
     class Program
@@ -275,9 +284,6 @@ namespace CS420Project3
             testBoard.setPiece(1, "d4");
             testBoard.setPiece(1, "d3");
             testBoard.printBoard();
-            testBoard.printMoveList();
-            testBoard.printTakenSpaces();
-            testBoard.printNextSpaces();
             Thread.Sleep(40000);
         }
 
