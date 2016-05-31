@@ -12,6 +12,11 @@ namespace CS420Project3
         public int x { get; set; }
         public int y { get; set; }
 
+        public Coordinate()
+        {
+            this.x = -1;
+            this.y = -1;
+        }
         public Coordinate(int x, int y)
         {
             this.x = x;
@@ -24,6 +29,7 @@ namespace CS420Project3
     {
         private int[,] board;
         private int size { get; }
+        private Coordinate lastMove;
         private List<string> moveList;
         private List<Coordinate> takenSpaces;
         private List<Coordinate> nextSpaces;
@@ -138,10 +144,10 @@ namespace CS420Project3
                 string move = location[0].ToString().ToUpper() + y;
                 Coordinate temp = new Coordinate(x, y);
                 takenSpaces.Add(temp);
+                lastMove = temp;
                 moveList.Add(move);
                 success = true;
-                int winner = checkWin(temp);
-                printWinner(winner);
+                int winner = checkWin();
                 nextSpaces.RemoveAll(item => item.x == x && item.y == y);
                 int x1 = x;
                 int y1 = y;
@@ -190,7 +196,7 @@ namespace CS420Project3
             return success;
         }
 
-        public int checkWin(Coordinate lastMove)
+        public int checkWin()
         {
             int winner = 0;
             int tempWinner = 0;
@@ -241,8 +247,45 @@ namespace CS420Project3
             }
             return winner;
         }
+    }
+    class Program
+    {
+        
+        static void Main(string[] args)
+        {
+            Board testBoard = new Board();
+            int winner = 0;
+            string input;
+            string humanMove;
+            int human;
+            int computer;
+            Console.WriteLine("Who is taking the first turn {Human(h) or Computer(c)}: ");
+            input = Console.ReadLine();
+            if(input.ToUpper() == "C")
+            {
+                computer = 1;
+                human = 2;
+                testBoard.setPiece(computer, "D5");
+            }
+            else
+            {
+                computer = 2;
+                human = 1;
+            }
+            while(winner == 0)
+            {
+                testBoard.printBoard();
+                Console.Write("Please enter a space {A-H + 1-8 e.g. E5}: ");
+                humanMove = Console.ReadLine();
+                testBoard.setPiece(human, humanMove);
+                winner = testBoard.checkWin();
+            }
+            testBoard.printBoard();
+            printWinner(winner);
+            Thread.Sleep(5000);
+        }
 
-        public void printWinner(int winner)
+        public static void printWinner(int winner)
         {
             if (winner != 0)
             {
@@ -257,105 +300,82 @@ namespace CS420Project3
             }
             else
             {
- //               Console.WriteLine("No winner detected\n");
+                //               Console.WriteLine("No winner detected\n");
             }
         }
-    }
-    class Program
-    {
-        
-        static void Main(string[] args)
-        {
-            Board testBoard = new Board();
-            testBoard.printBoard();
-            testBoard.setPiece(1, "D5");
-            testBoard.printBoard();
-            testBoard.printNextSpaces();
-            testBoard.setPiece(2, "E5");
-            testBoard.printBoard();
-            testBoard.printNextSpaces();
-            testBoard.setPiece(1, "d6");
-            testBoard.printBoard();
-            testBoard.printNextSpaces();
-            testBoard.setPiece(2, "d7");
-            testBoard.setPiece(1, "d4");
-            testBoard.setPiece(1, "d3");
-            testBoard.printBoard();
-            Thread.Sleep(40000);
-        }
 
-/*        public string minmaxDecision(Board board)
-        {
-            int value = maxValue(board);
-            string[] successors
-        }
-
-        public int maxValue(Board board)
-        {
-
-        }*/
-
- /*       string makemove(Board board)
-        {
-            int[,] workingBoard = board.getBoard();
-            int best = -20000, score, mi, mj;
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
+        /*        public string minmaxDecision(Board board)
                 {
-                    if (b[i][j] == 0)
-                    {
-                        b[i][j] = 1; // make move on board
-                        score = min(depth - 1);
-                        if (score > best) { mi = i; mj = j; best = score; }
-                        b[i][j] = 0; // undo move
-                    }
+                    int value = maxValue(board);
+                    string[] successors
                 }
-            }
-            cout << "my move is " << mi << " " << mj << endl;
-            b[mi][mj] = 1;
-        }
-        int min(int depth)
-        {
-            int best = 20000, score;
-            if (check4winner() != 0) return (check4winner());
-            if (depth == 0) return (evaluate());
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    if (b[i][j] == 0)
-                    {
-                        b[i][j] = 2; // make move on board
-                        score = max(depth - 1);
-                        if (score < best) best = score;
-                        b[i][j] = 0; // undo move
-                    }
-                }
-            }
-            return (best);
-        }
 
-        int max(int depth)
-        {
-            int best = -20000, score;
-            if (check4winner() != 0) return (check4winner());
-            if (depth == 0) return (evaluate());
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
+                public int maxValue(Board board)
                 {
-                    if (b[i][j] == 0)
-                    {
-                        b[i][j] = 1; // make move on board
-                        score = min(depth - 1);
-                        if (score > best) best = score;
-                        b[i][j] = 0; // undo move
-                    }
-                }
-            }
-            return (best);
-        }*/
+
+                }*/
+
+        /*       string makemove(Board board)
+               {
+                   int[,] workingBoard = board.getBoard();
+                   int best = -20000, score, mi, mj;
+                   for (int i = 0; i < 8; i++)
+                   {
+                       for (int j = 0; j < 8; j++)
+                       {
+                           if (b[i][j] == 0)
+                           {
+                               b[i][j] = 1; // make move on board
+                               score = min(depth - 1);
+                               if (score > best) { mi = i; mj = j; best = score; }
+                               b[i][j] = 0; // undo move
+                           }
+                       }
+                   }
+                   cout << "my move is " << mi << " " << mj << endl;
+                   b[mi][mj] = 1;
+               }
+               int min(int depth)
+               {
+                   int best = 20000, score;
+                   if (check4winner() != 0) return (check4winner());
+                   if (depth == 0) return (evaluate());
+                   for (int i = 0; i < 3; i++)
+                   {
+                       for (int j = 0; j < 3; j++)
+                       {
+                           if (b[i][j] == 0)
+                           {
+                               b[i][j] = 2; // make move on board
+                               score = max(depth - 1);
+                               if (score < best) best = score;
+                               b[i][j] = 0; // undo move
+                           }
+                       }
+                   }
+                   return (best);
+               }
+
+               int max(int depth)
+               {
+                   int best = -20000, score;
+                   if (check4winner() != 0) return (check4winner());
+                   if (depth == 0) return (evaluate());
+                   for (int i = 0; i < 3; i++)
+                   {
+                       for (int j = 0; j < 3; j++)
+                       {
+                           if (b[i][j] == 0)
+                           {
+                               b[i][j] = 1; // make move on board
+                               score = min(depth - 1);
+                               if (score > best) best = score;
+                               b[i][j] = 0; // undo move
+                           }
+                       }
+                   }
+                   return (best);
+               }*/
 
     }
 }
