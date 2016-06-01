@@ -29,7 +29,7 @@ namespace CS420Project3
     {
         private int[,] board;
         private int size { get; }
-        private Coordinate lastMove;
+        private Coordinate lastMove; // Used in win detection
         private List<string> moveList;
         private List<Coordinate> takenSpaces;
         private List<Coordinate> nextSpaces;
@@ -224,6 +224,7 @@ namespace CS420Project3
                 }
 
             }
+
             //Vertical check
             tempWinner = board[0, lastMove.y];
             for (int i = 0; i < size; i++)
@@ -250,7 +251,6 @@ namespace CS420Project3
     }
     class Program
     {
-        
         static void Main(string[] args)
         {
             Board testBoard = new Board();
