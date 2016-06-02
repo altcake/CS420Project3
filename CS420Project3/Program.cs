@@ -316,14 +316,14 @@ namespace CS420Project3
             int loopNums = 10;
             int ctr;
 
-            List<Coordinate> nextSpaces = board.getNextSpaces();
-            foreach(Coordinate space in nextSpaces)
-            {
+            string decision;
 
-            }
+            
+
+            return decision;
         }
 
-        public int calcMin(Board board)
+        public int calcMin(Board board, Coordinate space)
         {
             int min = 0;
             
@@ -338,13 +338,20 @@ namespace CS420Project3
             return min;
         }
 
-        public int calcMax(Board board)
+        public int calcMax(Board board, Coordinate space)
         {
             int max = 0;
+
+            List<Coordinate> nextSpaces = board.getNextSpaces();
+            foreach (Coordinate space in nextSpaces)
+            {
+                int thing = calcMax(board, space);
+            }
+
             List<Coordinate> nextSpaces = board.getNextSpaces();
             foreach(Coordinate space in nextSpaces)
             {
-                int thing = calcMin();
+                int thing = calcMin(board, space);
                 if(thing > max)
                 {
                     max = thing;
@@ -363,7 +370,6 @@ namespace CS420Project3
             int playerTotal = 0;
             int opponentTotal = 0;
             int count = 0;
-
 
             if(player == 1)
             {
@@ -407,6 +413,16 @@ namespace CS420Project3
                         count = 1;
                     }
                 }
+
+                if (lastPiece == player)
+                {
+                    playerTotal += (int)Math.Pow(10, count);
+                }
+                else if (lastPiece == opponent)
+                {
+                    opponentTotal += (int)Math.Pow(10, count);
+                }
+                count = 0;
             }
 
             //Vertical check
@@ -442,10 +458,20 @@ namespace CS420Project3
                         count = 1;
                     }
                 }
+
+                if (lastPiece == player)
+                {
+                    playerTotal += (int)Math.Pow(10, count);
+                }
+                else if (lastPiece == opponent)
+                {
+                    opponentTotal += (int)Math.Pow(10, count);
+                }
+                count = 0;
             }
             board.removePiece(space);
             return playerTotal - opponentTotal;
-    }
+        }
         /*        public string minmaxDecision(Board board)
                 {
                     int value = maxValue(board);
