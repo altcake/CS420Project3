@@ -304,6 +304,41 @@ namespace CS420Project3
             }
         }
 
+        public string minimaxDecision(Board board)
+        {
+            int loopNums = 10;
+            int ctr;
+        }
+
+        public int calcMin(Board board)
+        {
+            int min = 0;
+            List<Coordinate> nextSpaces = board.getNextSpaces();
+            foreach(Coordinate space in nextSpaces)
+            {
+                int thing = calcMax();
+                if (thing < min)
+                {
+                    min = thing;
+                }
+            }
+            return min;
+        }
+
+        public int calcMax(Board board)
+        {
+            int max = 0;
+            List<Coordinate> nextSpaces = board.getNextSpaces();
+            foreach(Coordinate space in nextSpaces)
+            {
+                int thing = calcMin();
+                if(thing > max)
+                {
+                    max = thing;
+                }
+            }
+            return max;
+        }
         /*        public string minmaxDecision(Board board)
                 {
                     int value = maxValue(board);
