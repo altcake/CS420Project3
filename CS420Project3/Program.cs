@@ -196,6 +196,29 @@ namespace CS420Project3
             return success;
         }
 
+        public bool testPiece(int piece, string location)
+        {
+            bool success = false;
+            int x = (int)((Coordinates)Enum.Parse(typeof(Coordinates), location[0].ToString().ToUpper()));
+            int y = ((int)Char.GetNumericValue(location[1])) - 1;
+            if (board[x, y] == 0)
+            {
+                board[x, y] = piece;
+                string move = location[0].ToString().ToUpper() + y;
+                Coordinate temp = new Coordinate(x, y);
+                takenSpaces.Add(temp);
+                lastMove = temp;
+                moveList.Add(move);
+                success = true;
+                int winner = checkWin();
+            }
+            else
+            {
+                Console.WriteLine("Placement failed - Space already used.");
+            }
+            return success;
+        }
+
         public void removePiece(string location)
         {
             int x = (int)((Coordinates)Enum.Parse(typeof(Coordinates), location[0].ToString().ToUpper()));
@@ -311,7 +334,7 @@ namespace CS420Project3
             }
             else
             {
-                //               Console.WriteLine("No winner detected\n");
+                // Console.WriteLine("No winner detected\n");
             }
         }
 
@@ -338,6 +361,8 @@ namespace CS420Project3
         public static int calcMin(Board board, Coordinate space, int currentDepth, int depthLimit)
         {
             int min = 100000;
+
+            if
             if(currentDepth <= depthLimit)
             {
                 List<Coordinate> nextSpaces = board.getNextSpaces();
