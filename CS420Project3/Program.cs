@@ -292,7 +292,8 @@ namespace CS420Project3
             }
             testBoard.printBoard();
             printWinner(winner);
-            Thread.Sleep(5000);
+            Console.Write("Press Enter to quit.");
+            Console.ReadLine();
         }
 
         public static void printWinner(int winner)
