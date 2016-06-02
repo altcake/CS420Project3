@@ -279,6 +279,7 @@ namespace CS420Project3
                 computer = 2;
                 human = 1;
             }
+
             while(winner == 0)
             {
                 testBoard.printBoard();
@@ -286,6 +287,8 @@ namespace CS420Project3
                 humanMove = Console.ReadLine();
                 testBoard.setPiece(human, humanMove);
                 winner = testBoard.checkWin();
+
+                testBoard.setPiece(computer, minimaxDecision(testBoard, computer));
             }
             testBoard.printBoard();
             printWinner(winner);
@@ -311,56 +314,63 @@ namespace CS420Project3
             }
         }
 
-        public string minimaxDecision(Board board, int player)
+        public static string minimaxDecision(Board board, int player)
         {
-            int loopNums = 10;
-            int ctr;
+            int depthLimit = 3;
+            int max = -100000;
 
-            string decision;
-
-            
+            string decision = null;
+            List<Coordinate> nextSpaces = board.getNextSpaces();
+            foreach (Coordinate space1 in nextSpaces)
+            {
+                int thing = calcMax(board, space1, 1, depthLimit);
+                if (thing > max)
+                {
+                    max = thing;
+                    decision = Enum.GetName(typeof(Coordinates), space1.x) + (space1.y + 1);
+                }
+            }
 
             return decision;
         }
 
-        public int calcMin(Board board, Coordinate space)
+        public static int calcMin(Board board, Coordinate space, int currentDepth, int depthLimit)
         {
-            int min = 0;
-            
-            foreach(Coordinate space in nextSpaces)
+            int min = 100000;
+            if(currentDepth <= depthLimit)
             {
-                int thing = calcMax();
-                if (thing < min)
+                List<Coordinate> nextSpaces = board.getNextSpaces();
+                foreach (Coordinate space1 in nextSpaces)
                 {
-                    min = thing;
+                    int thing = calcMax(board, space1, currentDepth + 1, depthLimit);
+                    if (thing < min)
+                    {
+                        min = thing;
+                    }
                 }
             }
             return min;
         }
 
-        public int calcMax(Board board, Coordinate space)
+        public static int calcMax(Board board, Coordinate space, int currentDepth, int depthLimit)
         {
-            int max = 0;
-
-            List<Coordinate> nextSpaces = board.getNextSpaces();
-            foreach (Coordinate space in nextSpaces)
+            int max = -100000;
+            if(currentDepth <= depthLimit)
             {
-                int thing = calcMax(board, space);
-            }
-
-            List<Coordinate> nextSpaces = board.getNextSpaces();
-            foreach(Coordinate space in nextSpaces)
-            {
-                int thing = calcMin(board, space);
-                if(thing > max)
+                List<Coordinate> nextSpaces = board.getNextSpaces();
+                foreach (Coordinate space1 in nextSpaces)
                 {
-                    max = thing;
+                    int thing = calcMin(board, space1, currentDepth + 1, depthLimit);
+                    if (thing > max)
+                    {
+                        max = thing;
+                    }
                 }
             }
             return max;
         }
 
-        public int calculateScore(Board board, string space, int player)
+        public static int calculateScore(Board board, string space, int player)
         {
             board.setPiece(player, space);
             int[,] activeBoard = board.getBoard();
