@@ -6,9 +6,12 @@ using System.Threading;
 
 namespace CS420Project3
 {
+    
     enum Coordinates { A, B, C, D, E, F, G, H };
+    enum Pieces { X = 1, O = 2 };
     class Coordinate
     {
+        static Random r = new Random();
         public int x { get; set; }
         public int y { get; set; }
 
@@ -45,11 +48,19 @@ namespace CS420Project3
 
         public Board(Board oldBoard)
         {
-            this.board = oldBoard.getBoard();
             this.size = oldBoard.size;
-            this.moveList = oldBoard.getMoveList();
-            this.takenSpaces = oldBoard.getTakenSpaces();
-            this.nextSpaces = oldBoard.getNextSpaces();
+            this.board = new int[8,8];
+            for (int i = 0; i < this.size; i++)
+            {
+                for (int j = 0; j < this.size; j++)
+                {
+                    board[i, j] = oldBoard.getBoard()[i, j];
+                }
+            }
+
+            this.moveList = oldBoard.getMoveList().ConvertAll(move => move);
+            this.takenSpaces = oldBoard.getTakenSpaces().ConvertAll(coordinate => new Coordinate(coordinate.x, coordinate.y));
+            this.nextSpaces = oldBoard.getNextSpaces().ConvertAll(coordinate => new Coordinate(coordinate.x, coordinate.y));
         }
 
         public void printMoveList()
@@ -135,15 +146,22 @@ namespace CS420Project3
 
         public bool setPiece(int piece, string location)
         {
-            bool success = false;
             int x = (int)((Coordinates)Enum.Parse(typeof(Coordinates), location[0].ToString().ToUpper()));
             int y = ((int)Char.GetNumericValue(location[1])) - 1;
+            return setPiece(piece, new Coordinate(x, y));
+        }
+
+        public bool setPiece(int piece, Coordinate location)
+        {
+            bool success = false;
+            int x = location.x;
+            int y = location.y;
             if (board[x, y] == 0)
             {
                 board[x, y] = piece;
-                string move = location[0].ToString().ToUpper() + y;
+                string move = Enum.GetName(typeof(Coordinates), location.x) + (location.y + 1);
                 Coordinate temp = new Coordinate(x, y);
-                takenSpaces.Add(temp);
+                takenSpaces.Add(location);
                 lastMove = temp;
                 moveList.Add(move);
                 success = true;
@@ -286,7 +304,8 @@ namespace CS420Project3
             Board testBoard = new Board();
             int winner = 0;
             string input;
-            string humanMove;
+            string computerMove;
+            string opponentMove;
             int human;
             int computer;
             Console.WriteLine("Who is taking the first turn {Human(h) or Computer(c)}: ");
@@ -295,7 +314,10 @@ namespace CS420Project3
             {
                 computer = 1;
                 human = 2;
-                testBoard.setPiece(computer, "D5");
+                computerMove = "D5";
+                testBoard.setPiece(computer, computerMove);
+                Console.WriteLine(Enum.GetName(typeof(Pieces), computer) + " to " + computerMove + "\n");
+
             }
             else
             {
@@ -307,11 +329,17 @@ namespace CS420Project3
             {
                 testBoard.printBoard();
                 Console.Write("Please enter a space {A-H + 1-8 e.g. E5}: ");
-                humanMove = Console.ReadLine();
-                testBoard.setPiece(human, humanMove);
+                opponentMove = Console.ReadLine();
+                testBoard.setPiece(human, opponentMove);
                 winner = testBoard.checkWin();
-
-                testBoard.setPiece(computer, minimaxDecision(testBoard, computer));
+                if(winner > 0)
+                {
+                    break;
+                }
+                computerMove = minimaxDecision(testBoard, computer);
+                testBoard.setPiece(computer, computerMove);
+                Console.WriteLine(Enum.GetName(typeof(Pieces), computer) + " to " + computerMove + "\n");
+                winner = testBoard.checkWin();
             }
             testBoard.printBoard();
             printWinner(winner);
@@ -340,65 +368,98 @@ namespace CS420Project3
 
         public static string minimaxDecision(Board board, int player)
         {
-            int depthLimit = 3;
+            int depthLimit = 2;
             int max = -100000;
-
+            
             string decision = null;
             List<Coordinate> nextSpaces = board.getNextSpaces();
             foreach (Coordinate space1 in nextSpaces)
             {
-                int thing = calcMax(board, space1, 1, depthLimit);
-                if (thing > max)
+                int thing = calcMin(board, space1, 0, depthLimit, player);
+                
+                if (thing >= max)
                 {
                     max = thing;
+                    
                     decision = Enum.GetName(typeof(Coordinates), space1.x) + (space1.y + 1);
+                    Console.WriteLine(max + " " + decision);
                 }
             }
-
+            //int lol =  r.Next(0, nextSpaces.Count-1);
+            //decision = Enum.GetName(typeof(Coordinates), nextSpaces[lol].x) + (nextSpaces[lol].y + 1);
             return decision;
         }
 
-        public static int calcMin(Board board, Coordinate space, int currentDepth, int depthLimit)
+        public static int calcMin(Board board, Coordinate space, int currentDepth, int depthLimit, int player)
         {
             int min = 100000;
+            int opponent;
+            Board tempBoard = new Board(board);
+            if (player == 1)
+            {
+                opponent = 2;
+            }
+            else
+            {
+                opponent = 1;
+            }
+            tempBoard.setPiece(player, space);
+            if(board.checkWin() > 0)
+            {
+                return min;
+            }
 
-            if
             if(currentDepth <= depthLimit)
             {
                 List<Coordinate> nextSpaces = board.getNextSpaces();
                 foreach (Coordinate space1 in nextSpaces)
                 {
-                    int thing = calcMax(board, space1, currentDepth + 1, depthLimit);
+                    int thing = calcMax(board, space1, currentDepth + 1, depthLimit, player);
                     if (thing < min)
                     {
                         min = thing;
                     }
                 }
             }
+            else
+            {
+                min = calculateScore(board, space, player);
+            }
+            //if (currentDepth == 0) Console.WriteLine("MIN " + min);
             return min;
         }
 
-        public static int calcMax(Board board, Coordinate space, int currentDepth, int depthLimit)
+        public static int calcMax(Board board, Coordinate space, int currentDepth, int depthLimit, int player)
         {
             int max = -100000;
-            if(currentDepth <= depthLimit)
+            if (board.checkWin() > 0)
+            {
+                return max;
+            }
+            if (currentDepth <= depthLimit)
             {
                 List<Coordinate> nextSpaces = board.getNextSpaces();
                 foreach (Coordinate space1 in nextSpaces)
                 {
-                    int thing = calcMin(board, space1, currentDepth + 1, depthLimit);
+                    int thing = calcMin(board, space1, currentDepth + 1, depthLimit, player);
                     if (thing > max)
                     {
                         max = thing;
                     }
                 }
             }
+            else
+            {
+                max = calculateScore(board, space, player);
+            }
+            //Console.WriteLine("MAX " + max);
             return max;
         }
 
-        public static int calculateScore(Board board, string space, int player)
+        public static int calculateScore(Board board, Coordinate space, int player)
         {
-            board.setPiece(player, space);
+            string tempSpace = Enum.GetName(typeof(Coordinates), space.x) + (space.y + 1);
+            board.testPiece(player, tempSpace);
             int[,] activeBoard = board.getBoard();
             int size = (int)(Math.Sqrt(activeBoard.Length));
             int opponent = 0;
@@ -419,7 +480,7 @@ namespace CS420Project3
             // Horizontal check
             for (int i = 0; i < size; i++)
             {
-                for (int j = 0; i < size; i++)
+                for (int j = 0; j < size; j++)
                 {
                     if (activeBoard[i,j] == player && lastPiece == player)
                     {
@@ -439,15 +500,28 @@ namespace CS420Project3
                         }
                         else if(lastPiece == opponent)
                         {
-                            opponentTotal += (int)Math.Pow(10, count);
+                            opponentTotal += (int)Math.Pow(10, count) + 1;
                         }
                         count = 0;
+                    }
+
+                    else if (activeBoard[i,j] == player && lastPiece == opponent)
+                    {
+                        playerTotal += (int)Math.Pow(10, count);
+                        count = 1;
+                    }
+
+                    else if (activeBoard[i,j] == opponent && lastPiece == player)
+                    {
+                        opponentTotal += (int)Math.Pow(10, count) + 1;
+                        count = 1;
                     }
 
                     else if((activeBoard[i,j] == player || activeBoard[i,j] == opponent) && lastPiece == 0)
                     {
                         count = 1;
                     }
+                    lastPiece = activeBoard[i, j];
                 }
 
                 if (lastPiece == player)
@@ -456,17 +530,30 @@ namespace CS420Project3
                 }
                 else if (lastPiece == opponent)
                 {
-                    opponentTotal += (int)Math.Pow(10, count);
+                    opponentTotal += (int)Math.Pow(10, count) + 1;
                 }
                 count = 0;
             }
+            lastPiece = 0;
 
             //Vertical check
             for (int i = 0; i < size; i++)
             {
-                for (int j = 0; i < size; i++)
+                for (int j = 0; j < size; j++)
                 {
-                    if (activeBoard[j,i] == player && lastPiece == player)
+                    if (activeBoard[j, i] == 0)
+                    {
+                        if (lastPiece == player)
+                        {
+                            playerTotal += (int)Math.Pow(10, count);
+                        }
+                        else if (lastPiece == opponent)
+                        {
+                            opponentTotal += (int)Math.Pow(10, count) + 1;
+                        }
+                        count = 0;
+                    }
+                    else if (activeBoard[j,i] == player && lastPiece == player)
                     {
                         count++;
                     }
@@ -484,15 +571,28 @@ namespace CS420Project3
                         }
                         else if (lastPiece == opponent)
                         {
-                            opponentTotal += (int)Math.Pow(10, count);
+                            opponentTotal += (int)Math.Pow(10, count) + 1;
                         }
                         count = 0;
+                    }
+
+                    else if (activeBoard[j,i] == player && lastPiece == opponent)
+                    {
+                        playerTotal += (int)Math.Pow(10, count);
+                        count = 1;
+                    }
+
+                    else if (activeBoard[j, i] == opponent && lastPiece == player)
+                    {
+                        opponentTotal += (int)Math.Pow(10, count) + 1;
+                        count = 1;
                     }
 
                     else if ((activeBoard[j,i] == player || activeBoard[j,i] == opponent) && lastPiece == 0)
                     {
                         count = 1;
                     }
+                    lastPiece = activeBoard[j, i];
                 }
 
                 if (lastPiece == player)
@@ -505,81 +605,9 @@ namespace CS420Project3
                 }
                 count = 0;
             }
-            board.removePiece(space);
+            board.removePiece(tempSpace);
+            //Console.WriteLine("Heuristics:\n" + playerTotal + " " + opponentTotal);
             return playerTotal - opponentTotal;
         }
-        /*        public string minmaxDecision(Board board)
-                {
-                    int value = maxValue(board);
-                    string[] successors
-                }
-
-                public int maxValue(Board board)
-                {
-
-                }*/
-
-        /*       string makemove(Board board)
-               {
-                   int[,] workingBoard = board.getBoard();
-                   int best = -20000, score, mi, mj;
-                   for (int i = 0; i < 8; i++)
-                   {
-                       for (int j = 0; j < 8; j++)
-                       {
-                           if (b[i][j] == 0)
-                           {
-                               b[i][j] = 1; // make move on board
-                               score = min(depth - 1);
-                               if (score > best) { mi = i; mj = j; best = score; }
-                               b[i][j] = 0; // undo move
-                           }
-                       }
-                   }
-                   cout << "my move is " << mi << " " << mj << endl;
-                   b[mi][mj] = 1;
-               }
-               int min(int depth)
-               {
-                   int best = 20000, score;
-                   if (check4winner() != 0) return (check4winner());
-                   if (depth == 0) return (evaluate());
-                   for (int i = 0; i < 3; i++)
-                   {
-                       for (int j = 0; j < 3; j++)
-                       {
-                           if (b[i][j] == 0)
-                           {
-                               b[i][j] = 2; // make move on board
-                               score = max(depth - 1);
-                               if (score < best) best = score;
-                               b[i][j] = 0; // undo move
-                           }
-                       }
-                   }
-                   return (best);
-               }
-
-               int max(int depth)
-               {
-                   int best = -20000, score;
-                   if (check4winner() != 0) return (check4winner());
-                   if (depth == 0) return (evaluate());
-                   for (int i = 0; i < 3; i++)
-                   {
-                       for (int j = 0; j < 3; j++)
-                       {
-                           if (b[i][j] == 0)
-                           {
-                               b[i][j] = 1; // make move on board
-                               score = min(depth - 1);
-                               if (score > best) best = score;
-                               b[i][j] = 0; // undo move
-                           }
-                       }
-                   }
-                   return (best);
-               }*/
-
     }
 }
