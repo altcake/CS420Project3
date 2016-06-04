@@ -245,7 +245,6 @@ namespace CS420Project3
                 }
 
             }
-
             //Vertical check
             tempWinner = board[0, lastMove.y];
             for (int i = 0; i < size; i++)
