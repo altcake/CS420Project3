@@ -6,12 +6,10 @@ using System.Threading;
 
 namespace CS420Project3
 {
-    
     enum Coordinates { A, B, C, D, E, F, G, H };
     enum Pieces { X = 1, O = 2 };
     class Coordinate
     {
-        static Random r = new Random();
         public int x { get; set; }
         public int y { get; set; }
 
@@ -25,8 +23,12 @@ namespace CS420Project3
             this.x = x;
             this.y = y;
         }
-
+        public override String ToString()
+        {
+            return "" + Enum.GetName(typeof(Coordinates), x) + (y + 1);
+        }
     }
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // TODO: possibly merge moveList and takenSpaces since they'll be storing the same data.
     class Board
     {
@@ -51,12 +53,8 @@ namespace CS420Project3
             this.size = oldBoard.size;
             this.board = new int[8,8];
             for (int i = 0; i < this.size; i++)
-            {
                 for (int j = 0; j < this.size; j++)
-                {
                     board[i, j] = oldBoard.getBoard()[i, j];
-                }
-            }
 
             this.moveList = oldBoard.getMoveList().ConvertAll(move => move);
             this.takenSpaces = oldBoard.getTakenSpaces().ConvertAll(coordinate => new Coordinate(coordinate.x, coordinate.y));
@@ -67,9 +65,7 @@ namespace CS420Project3
         {
             Console.WriteLine("Player   Opponent");
             for (int i = 0; i < moveList.Count; i += 2)
-            {
                 Console.WriteLine(moveList[i] + "       " + moveList[i + 1]);
-            }
         }
 
         public void printBoard()
@@ -81,17 +77,11 @@ namespace CS420Project3
                 for (int i = 0; i < size; i++)
                 {
                     if (board[(int)((Coordinates)Enum.Parse(typeof(Coordinates), coordinateName)), i] == 1)
-                    {
                         Console.Write("X ");
-                    }
                     else if (board[(int)((Coordinates)Enum.Parse(typeof(Coordinates), coordinateName)), i] == 2)
-                    {
                         Console.Write("O ");
-                    }
                     else
-                    {
                         Console.Write("- ");
-                    }
                 }
                 Console.WriteLine();
             }
@@ -172,40 +162,24 @@ namespace CS420Project3
 
                 x1 = x;
                 y1 = y + 1;
-                if (y1 < size)
-                {
-                    if (board[x1, y1] == 0)
-                    {
-                        nextSpaces.Add(new Coordinate(x1, y1));
-                    }
-                }
+                if (y1 < size && board[x1, y1] == 0)
+                    nextSpaces.Add(new Coordinate(x1, y1));
+
                 x1 = x;
                 y1 = y - 1;
-                if (y1 >= 0)
-                {
-                    if (board[x1, y1] == 0)
-                    {
-                        nextSpaces.Add(new Coordinate(x1, y1));
-                    }
-                }
+                if (y1 >= 0 && board[x1, y1] == 0)
+                    nextSpaces.Add(new Coordinate(x1, y1));
+
                 x1 = x + 1;
                 y1 = y;
-                if (x1 < size)
-                {
-                    if (board[x1, y1] == 0)
-                    {
-                        nextSpaces.Add(new Coordinate(x1, y1));
-                    }
-                }
+                if (x1 < size && board[x1, y1] == 0)
+                    nextSpaces.Add(new Coordinate(x1, y1));
+
                 x1 = x - 1;
                 y1 = y;
-                if (x1 >= 0)
-                {
-                    if (board[x1, y1] == 0)
-                    {
-                        nextSpaces.Add(new Coordinate(x1, y1));
-                    }
-                }
+                if (x1 >= 0 && board[x1, y1] == 0)
+                    nextSpaces.Add(new Coordinate(x1, y1));
+
             }
             else
             {
@@ -258,7 +232,6 @@ namespace CS420Project3
                 {
                     count++;
                 }
-
                 else
                 {
                     count = 1;
@@ -297,6 +270,7 @@ namespace CS420Project3
             return winner;
         }
     }
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     class Program
     {
         static void Main(string[] args)
@@ -317,7 +291,6 @@ namespace CS420Project3
                 computerMove = "D5";
                 testBoard.setPiece(computer, computerMove);
                 Console.WriteLine(Enum.GetName(typeof(Pieces), computer) + " to " + computerMove + "\n");
-
             }
             else
             {
@@ -333,9 +306,7 @@ namespace CS420Project3
                 testBoard.setPiece(human, opponentMove);
                 winner = testBoard.checkWin();
                 if(winner > 0)
-                {
                     break;
-                }
                 computerMove = minimaxDecision(testBoard, computer);
                 testBoard.setPiece(computer, computerMove);
                 Console.WriteLine(Enum.GetName(typeof(Pieces), computer) + " to " + computerMove + "\n");
@@ -346,7 +317,6 @@ namespace CS420Project3
             Console.Write("Press Enter to quit.");
             Console.ReadLine();
         }
-
         public static void printWinner(int winner)
         {
             if (winner != 0)
@@ -366,93 +336,97 @@ namespace CS420Project3
             }
         }
 
+        public static bool bogoMove = false;
+        //bogomove overrides all other moves
+
+        public static int debugMode = 1;
+        //0 = no debug
+        //1 = print search tree
+        //2 = print decision overrides
+
+        public static int depthLimit = 1;
+        //sets the depth of the search
+
+        public static Random r = new Random();
+        //for all your bogo needs
+
         public static string minimaxDecision(Board board, int player)
         {
-            int depthLimit = 2;
             int max = -100000;
-            
             string decision = null;
             List<Coordinate> nextSpaces = board.getNextSpaces();
             foreach (Coordinate space1 in nextSpaces)
             {
-                int thing = calcMin(board, space1, 0, depthLimit, player);
-                
-                if (thing >= max)
+                int thing = calcMin(board, space1, 0, player);
+                if (debugMode == 1) Console.WriteLine("Max " + space1.ToString() + " " + thing);
+
+                if (thing > max)
                 {
                     max = thing;
-                    
                     decision = Enum.GetName(typeof(Coordinates), space1.x) + (space1.y + 1);
-                    Console.WriteLine(max + " " + decision);
+                    if (debugMode == 2 ) Console.WriteLine(max + " " + decision);
                 }
             }
-            //int lol =  r.Next(0, nextSpaces.Count-1);
-            //decision = Enum.GetName(typeof(Coordinates), nextSpaces[lol].x) + (nextSpaces[lol].y + 1);
+            if (bogoMove) //random move from all valid moves chosen.  can be enabled if the ai is worse than a random number generator
+            {
+                int lol =  r.Next(0, nextSpaces.Count-1);
+                decision = Enum.GetName(typeof(Coordinates), nextSpaces[lol].x) + (nextSpaces[lol].y + 1);
+            }
             return decision;
         }
 
-        public static int calcMin(Board board, Coordinate space, int currentDepth, int depthLimit, int player)
+        public static int calcMin(Board board, Coordinate space, int currentDepth, int player)
         {
             int min = 100000;
-            int opponent;
             Board tempBoard = new Board(board);
-            if (player == 1)
-            {
-                opponent = 2;
-            }
-            else
-            {
-                opponent = 1;
-            }
             tempBoard.setPiece(player, space);
-            if(board.checkWin() > 0)
-            {
-                return min;
-            }
+            if(tempBoard.checkWin() > 0) return min * -1;
 
             if(currentDepth <= depthLimit)
             {
-                List<Coordinate> nextSpaces = board.getNextSpaces();
+                List<Coordinate> nextSpaces = tempBoard.getNextSpaces();
                 foreach (Coordinate space1 in nextSpaces)
                 {
-                    int thing = calcMax(board, space1, currentDepth + 1, depthLimit, player);
-                    if (thing < min)
-                    {
-                        min = thing;
-                    }
+                    int thing = calcMax(tempBoard, space1, currentDepth + 1, player);
+                    if (thing < min) min = thing;
                 }
             }
             else
-            {
                 min = calculateScore(board, space, player);
+            if (debugMode == 1)
+            {
+                string printBreak = "";
+                printBreak += "      ";
+                for (int z = 0; z < currentDepth; z++) printBreak += "      ";
+                Console.WriteLine(printBreak + "MIN " + space.ToString() + " " + min);
             }
-            //if (currentDepth == 0) Console.WriteLine("MIN " + min);
             return min;
         }
 
-        public static int calcMax(Board board, Coordinate space, int currentDepth, int depthLimit, int player)
+        public static int calcMax(Board board, Coordinate space, int currentDepth, int player)
         {
             int max = -100000;
-            if (board.checkWin() > 0)
-            {
-                return max;
-            }
+            Board tempBoard = new Board(board);
+            tempBoard.setPiece(player, space);
+            if (tempBoard.checkWin() > 0) return max * -1;
             if (currentDepth <= depthLimit)
             {
-                List<Coordinate> nextSpaces = board.getNextSpaces();
+                List<Coordinate> nextSpaces = tempBoard.getNextSpaces();
                 foreach (Coordinate space1 in nextSpaces)
                 {
-                    int thing = calcMin(board, space1, currentDepth + 1, depthLimit, player);
-                    if (thing > max)
-                    {
-                        max = thing;
-                    }
+                    int thing = calcMin(tempBoard, space1, currentDepth + 1, player);
+                    if (thing > max) max = thing;
                 }
             }
             else
-            {
                 max = calculateScore(board, space, player);
+            if (debugMode == 1)
+            {
+                string printBreak = "";
+                printBreak += "      ";
+                for (int z = 0; z < currentDepth; z++) printBreak += "      ";
+                Console.WriteLine(printBreak + "MAX " + space.ToString() + " " + max);
             }
-            //Console.WriteLine("MAX " + max);
             return max;
         }
 
@@ -468,70 +442,44 @@ namespace CS420Project3
             int opponentTotal = 0;
             int count = 0;
 
-            if(player == 1)
-            {
-                opponent = 2;
-            }
-            else
-            {
-                opponent = 1;
-            }
-
+            //determines opponent
+            opponent =  player == 1 ?  2 : 1;
             // Horizontal check
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
                 {
                     if (activeBoard[i,j] == player && lastPiece == player)
-                    {
                         count++;
-                    }
-
                     else if (activeBoard[i,j] == opponent && lastPiece == opponent)
-                    {
                         count++;
-                    }
-
                     else if (activeBoard[i,j] == 0)
                     {
                         if(lastPiece == player)
-                        {
                             playerTotal += (int)Math.Pow(10, count);
-                        }
                         else if(lastPiece == opponent)
-                        {
                             opponentTotal += (int)Math.Pow(10, count) + 1;
-                        }
                         count = 0;
                     }
-
                     else if (activeBoard[i,j] == player && lastPiece == opponent)
                     {
                         playerTotal += (int)Math.Pow(10, count);
                         count = 1;
                     }
-
                     else if (activeBoard[i,j] == opponent && lastPiece == player)
                     {
                         opponentTotal += (int)Math.Pow(10, count) + 1;
                         count = 1;
                     }
-
                     else if((activeBoard[i,j] == player || activeBoard[i,j] == opponent) && lastPiece == 0)
-                    {
                         count = 1;
-                    }
                     lastPiece = activeBoard[i, j];
                 }
 
                 if (lastPiece == player)
-                {
                     playerTotal += (int)Math.Pow(10, count);
-                }
                 else if (lastPiece == opponent)
-                {
                     opponentTotal += (int)Math.Pow(10, count) + 1;
-                }
                 count = 0;
             }
             lastPiece = 0;
@@ -541,38 +489,16 @@ namespace CS420Project3
             {
                 for (int j = 0; j < size; j++)
                 {
-                    if (activeBoard[j, i] == 0)
-                    {
-                        if (lastPiece == player)
-                        {
-                            playerTotal += (int)Math.Pow(10, count);
-                        }
-                        else if (lastPiece == opponent)
-                        {
-                            opponentTotal += (int)Math.Pow(10, count) + 1;
-                        }
-                        count = 0;
-                    }
-                    else if (activeBoard[j,i] == player && lastPiece == player)
-                    {
+                    if (activeBoard[j,i] == player && lastPiece == player)
                         count++;
-                    }
-
                     else if (activeBoard[j,i] == opponent && lastPiece == opponent)
-                    {
                         count++;
-                    }
-
                     else if (activeBoard[j,i] == 0)
                     {
                         if (lastPiece == player)
-                        {
                             playerTotal += (int)Math.Pow(10, count);
-                        }
                         else if (lastPiece == opponent)
-                        {
                             opponentTotal += (int)Math.Pow(10, count) + 1;
-                        }
                         count = 0;
                     }
 
@@ -581,28 +507,20 @@ namespace CS420Project3
                         playerTotal += (int)Math.Pow(10, count);
                         count = 1;
                     }
-
                     else if (activeBoard[j, i] == opponent && lastPiece == player)
                     {
                         opponentTotal += (int)Math.Pow(10, count) + 1;
                         count = 1;
                     }
-
                     else if ((activeBoard[j,i] == player || activeBoard[j,i] == opponent) && lastPiece == 0)
-                    {
                         count = 1;
-                    }
                     lastPiece = activeBoard[j, i];
                 }
 
                 if (lastPiece == player)
-                {
                     playerTotal += (int)Math.Pow(10, count);
-                }
                 else if (lastPiece == opponent)
-                {
                     opponentTotal += (int)Math.Pow(10, count);
-                }
                 count = 0;
             }
             board.removePiece(tempSpace);
