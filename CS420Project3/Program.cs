@@ -286,7 +286,10 @@ namespace CS420Project3
             string opponentMove;
             int human;
             int computer;
+            int time;
             bool success = false;
+            Console.WriteLine("How many seconds should the program search for?");
+            time = Convert.ToInt32(Console.ReadLine());
             Console.WriteLine("Who is taking the first turn {Human(h) or Computer(c)}: ");
             input = Console.ReadLine();
             if (input.ToUpper() == "C")
