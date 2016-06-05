@@ -529,13 +529,13 @@ namespace CS420Project3
                 count = 0;
                 lastPiece = 0;
             }
-
-            //Vertical check
-            for (int j = 0; j < size; j++)
+            
+            // vertical check
+            for (int i = 0; i < size; i++)
             {
-                for (int i = 0; i < size; i++)
+                for (int j = 0; j < size; j++)
                 {
-                    if (activeBoard[i, j] == 0)
+                    if (activeBoard[j, i] == 0)
                     {
                         if (lastPiece == player)
                             playerTotal += (int)Math.Pow(10, count);
@@ -543,23 +543,23 @@ namespace CS420Project3
                             opponentTotal += (int)Math.Pow(10, count);
                         count = 0;
                     }
-                    else if (activeBoard[i, j] == lastPiece && activeBoard[i, j] != 0)
+                    else if (activeBoard[j, i] == lastPiece && activeBoard[j, i] != 0)
                         count++;
-                    else if (activeBoard[i, j] == player && lastPiece == opponent)
+                    else if (activeBoard[j, i] == player && lastPiece == opponent)
                     {
                         opponentTotal += (int)Math.Pow(10, count);
                         count = 1;
                     }
-                    else if (activeBoard[i, j] == opponent && lastPiece == player)
+                    else if (activeBoard[j, i] == opponent && lastPiece == player)
                     {
                         playerTotal += (int)Math.Pow(10, count);
                         count = 1;
                     }
-                    else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
+                    else if ((activeBoard[j, i] == player || activeBoard[j, i] == opponent) && lastPiece == 0)
                         count = 1;
                     else
                         count = 0;
-                    lastPiece = activeBoard[i, j];
+                    lastPiece = activeBoard[j, i];
                 }
 
                 if (lastPiece == player)
@@ -570,12 +570,12 @@ namespace CS420Project3
                 lastPiece = 0;
             }
 
-            //Vertical check2
-            for (int j = size - 1; j >= 0; j--)
+            // vertical check2
+            for (int i = size - 1; i >= 0; i--)
             {
-                for (int i = size - 1; i >= 0; i--)
+                for (int j = size - 1; j >= 0; j--)
                 {
-                    if (activeBoard[i, j] == 0)
+                    if (activeBoard[j, i] == 0)
                     {
                         if (lastPiece == player)
                             playerTotal += (int)Math.Pow(10, count);
@@ -583,23 +583,23 @@ namespace CS420Project3
                             opponentTotal += (int)Math.Pow(10, count);
                         count = 0;
                     }
-                    else if (activeBoard[i, j] == lastPiece && activeBoard[i, j] != 0)
+                    else if (activeBoard[j, i] == lastPiece && activeBoard[j, i] != 0)
                         count++;
-                    else if (activeBoard[i, j] == player && lastPiece == opponent)
+                    else if (activeBoard[j, i] == player && lastPiece == opponent)
                     {
                         opponentTotal += (int)Math.Pow(10, count);
                         count = 1;
                     }
-                    else if (activeBoard[i, j] == opponent && lastPiece == player)
+                    else if (activeBoard[j, i] == opponent && lastPiece == player)
                     {
                         playerTotal += (int)Math.Pow(10, count);
                         count = 1;
                     }
-                    else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
+                    else if ((activeBoard[j, i] == player || activeBoard[j, i] == opponent) && lastPiece == 0)
                         count = 1;
                     else
                         count = 0;
-                    lastPiece = activeBoard[i, j];
+                    lastPiece = activeBoard[j, i];
                 }
 
                 if (lastPiece == player)
