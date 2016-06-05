@@ -346,7 +346,7 @@ namespace CS420Project3
         //1 = print search tree
         //2 = print decision overrides
 
-        public static int depthLimit = 1;
+        public static int depthLimit = 3;
         //sets the depth of the search
 
         public static int printDepthLimit = 10;
@@ -362,10 +362,10 @@ namespace CS420Project3
             List<Coordinate> nextSpaces = board.getNextSpaces();
             foreach (Coordinate space1 in nextSpaces)
             {
-                int thing = calcMin(board, space1, 0, player);
-                if (thing > max)
+                int newHeurstic = calcMin(board, space1, 0, player, max);
+                if (newHeurstic > max)
                 {
-                    max = thing;
+                    max = newHeurstic;
                     decision = Enum.GetName(typeof(Coordinates), space1.x) + (space1.y + 1);
                     if (debugMode == 2) Console.WriteLine(max + " " + decision);
                 }
@@ -379,9 +379,9 @@ namespace CS420Project3
             return decision;
         }
 
-        public static int calcMin(Board board, Coordinate space, int currentDepth, int player)
+        public static int calcMin(Board board, Coordinate space, int currentDepth, int player, int max)
         {
-            int min = 100000;
+            int min = 10000000;
             Board tempBoard = new Board(board);
             tempBoard.setPiece(player, space);
 
@@ -390,8 +390,11 @@ namespace CS420Project3
                 List<Coordinate> nextSpaces = tempBoard.getNextSpaces();
                 foreach (Coordinate space1 in nextSpaces)
                 {
-                    int thing = calcMax(tempBoard, space1, currentDepth + 1, player);
-                    if (thing < min) min = thing;
+                    int newHeurstic = calcMax(tempBoard, space1, currentDepth + 1, player, min);
+                    if (newHeurstic < min)
+                        min = newHeurstic;
+                    else if (newHeurstic < max) //continue;
+                        return min; //alpha beta pruning
                 }
             }
             else
@@ -406,9 +409,9 @@ namespace CS420Project3
             return min;
         }
 
-        public static int calcMax(Board board, Coordinate space, int currentDepth, int player)
+        public static int calcMax(Board board, Coordinate space, int currentDepth, int player, int min)
         {
-            int max = -100000;
+            int max = -10000000;
             Board tempBoard = new Board(board);
             tempBoard.setPiece(player, space);
             if (currentDepth <= depthLimit)
@@ -416,8 +419,11 @@ namespace CS420Project3
                 List<Coordinate> nextSpaces = tempBoard.getNextSpaces();
                 foreach (Coordinate space1 in nextSpaces)
                 {
-                    int thing = calcMin(tempBoard, space1, currentDepth + 1, player);
-                    if (thing > max) max = thing;
+                    int newHeurstic = calcMin(tempBoard, space1, currentDepth + 1, player, max);
+                    if (newHeurstic > max)
+                        max = newHeurstic;
+                    else if (newHeurstic < min) //continue;
+                        return max; //alpha beta pruning
                 }
             }
             else
@@ -449,11 +455,7 @@ namespace CS420Project3
             {
                 for (int j = 0; j < size; j++)
                 {
-                    if (activeBoard[i, j] == player && lastPiece == player)
-                        count++;
-                    else if (activeBoard[i, j] == opponent && lastPiece == opponent)
-                        count++;
-                    else if (activeBoard[i, j] == 0)
+                    if (activeBoard[i, j] == 0)
                     {
                         if (lastPiece == player)
                             playerTotal += (int)Math.Pow(10, count);
@@ -461,6 +463,8 @@ namespace CS420Project3
                             opponentTotal += (int)Math.Pow(10, count);
                         count = 0;
                     }
+                    else if (activeBoard[i, j] == lastPiece && activeBoard[i, j] != 0)
+                        count++;
                     else if (activeBoard[i, j] == player && lastPiece == opponent)
                     {
                         opponentTotal += (int)Math.Pow(10, count);
@@ -473,6 +477,8 @@ namespace CS420Project3
                     }
                     else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
                         count = 1;
+                    else
+                        count = 0;
                     lastPiece = activeBoard[i, j];
                 }
 
@@ -481,19 +487,15 @@ namespace CS420Project3
                 else if (lastPiece == opponent)
                     opponentTotal += (int)Math.Pow(10, count);
                 count = 0;
+                lastPiece = 0;
             }
-            lastPiece = 0;
 
             // Horizontal check2
             for (int i = size - 1; i >= 0; i--)
             {
                 for (int j = size - 1; j >= 0; j--)
                 {
-                    if (activeBoard[i, j] == player && lastPiece == player)
-                        count++;
-                    else if (activeBoard[i, j] == opponent && lastPiece == opponent)
-                        count++;
-                    else if (activeBoard[i, j] == 0)
+                    if (activeBoard[i, j] == 0)
                     {
                         if (lastPiece == player)
                             playerTotal += (int)Math.Pow(10, count);
@@ -501,6 +503,8 @@ namespace CS420Project3
                             opponentTotal += (int)Math.Pow(10, count);
                         count = 0;
                     }
+                    else if (activeBoard[i, j] == lastPiece && activeBoard[i, j] != 0)
+                        count++;
                     else if (activeBoard[i, j] == player && lastPiece == opponent)
                     {
                         opponentTotal += (int)Math.Pow(10, count);
@@ -513,6 +517,8 @@ namespace CS420Project3
                     }
                     else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
                         count = 1;
+                    else
+                        count = 0;
                     lastPiece = activeBoard[i, j];
                 }
 
@@ -521,19 +527,15 @@ namespace CS420Project3
                 else if (lastPiece == opponent)
                     opponentTotal += (int)Math.Pow(10, count);
                 count = 0;
+                lastPiece = 0;
             }
-            lastPiece = 0;
 
             //Vertical check
             for (int j = 0; j < size; j++)
             {
                 for (int i = 0; i < size; i++)
                 {
-                    if (activeBoard[i, j] == player && lastPiece == player)
-                        count++;
-                    else if (activeBoard[i, j] == opponent && lastPiece == opponent)
-                        count++;
-                    else if (activeBoard[i, j] == 0)
+                    if (activeBoard[i, j] == 0)
                     {
                         if (lastPiece == player)
                             playerTotal += (int)Math.Pow(10, count);
@@ -541,6 +543,8 @@ namespace CS420Project3
                             opponentTotal += (int)Math.Pow(10, count);
                         count = 0;
                     }
+                    else if (activeBoard[i, j] == lastPiece && activeBoard[i, j] != 0)
+                        count++;
                     else if (activeBoard[i, j] == player && lastPiece == opponent)
                     {
                         opponentTotal += (int)Math.Pow(10, count);
@@ -553,6 +557,8 @@ namespace CS420Project3
                     }
                     else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
                         count = 1;
+                    else
+                        count = 0;
                     lastPiece = activeBoard[i, j];
                 }
 
@@ -561,19 +567,15 @@ namespace CS420Project3
                 else if (lastPiece == opponent)
                     opponentTotal += (int)Math.Pow(10, count);
                 count = 0;
+                lastPiece = 0;
             }
-            lastPiece = 0;
 
             //Vertical check2
             for (int j = size - 1; j >= 0; j--)
             {
                 for (int i = size - 1; i >= 0; i--)
                 {
-                    if (activeBoard[i, j] == player && lastPiece == player)
-                        count++;
-                    else if (activeBoard[i, j] == opponent && lastPiece == opponent)
-                        count++;
-                    else if (activeBoard[i, j] == 0)
+                    if (activeBoard[i, j] == 0)
                     {
                         if (lastPiece == player)
                             playerTotal += (int)Math.Pow(10, count);
@@ -581,6 +583,8 @@ namespace CS420Project3
                             opponentTotal += (int)Math.Pow(10, count);
                         count = 0;
                     }
+                    else if (activeBoard[i, j] == lastPiece && activeBoard[i, j] != 0)
+                        count++;
                     else if (activeBoard[i, j] == player && lastPiece == opponent)
                     {
                         opponentTotal += (int)Math.Pow(10, count);
@@ -593,6 +597,8 @@ namespace CS420Project3
                     }
                     else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
                         count = 1;
+                    else
+                        count = 0;
                     lastPiece = activeBoard[i, j];
                 }
 
@@ -601,8 +607,8 @@ namespace CS420Project3
                 else if (lastPiece == opponent)
                     opponentTotal += (int)Math.Pow(10, count);
                 count = 0;
+                lastPiece = 0;
             }
-            lastPiece = 0;
 
             //Console.WriteLine("Heuristics:\n" + playerTotal + " " + opponentTotal);
             return playerTotal - opponentTotal;
