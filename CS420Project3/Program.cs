@@ -1,4 +1,7 @@
-﻿using System;
+﻿// CS 420 Project 3
+// Created by Ara Malayan and Ethan Sitt
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

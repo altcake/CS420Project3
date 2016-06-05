@@ -4,3 +4,9 @@ C:\Users\Ethan\Downloads\CS420Project3-master\CS420Project3-master\CS420Project3
 C:\Users\Ethan\Downloads\CS420Project3-master\CS420Project3-master\CS420Project3\obj\Debug\CS420Project3.csprojResolveAssemblyReference.cache
 C:\Users\Ethan\Downloads\CS420Project3-master\CS420Project3-master\CS420Project3\obj\Debug\CS420Project3.exe
 C:\Users\Ethan\Downloads\CS420Project3-master\CS420Project3-master\CS420Project3\obj\Debug\CS420Project3.pdb
+D:\Users\Ara Malayan\Documents\GitHub\CS420Project3\CS420Project3\bin\Debug\CS420Project3.exe.config
+D:\Users\Ara Malayan\Documents\GitHub\CS420Project3\CS420Project3\bin\Debug\CS420Project3.exe
+D:\Users\Ara Malayan\Documents\GitHub\CS420Project3\CS420Project3\bin\Debug\CS420Project3.pdb
+D:\Users\Ara Malayan\Documents\GitHub\CS420Project3\CS420Project3\obj\Debug\CS420Project3.csprojResolveAssemblyReference.cache
+D:\Users\Ara Malayan\Documents\GitHub\CS420Project3\CS420Project3\obj\Debug\CS420Project3.exe
+D:\Users\Ara Malayan\Documents\GitHub\CS420Project3\CS420Project3\obj\Debug\CS420Project3.pdb
