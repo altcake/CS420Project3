@@ -245,7 +245,7 @@ namespace CS420Project3
                 }
 
             }
-            count = 0;
+
             //Vertical check
             tempWinner = board[0, lastMove.y];
             for (int i = 0; i < size; i++)
@@ -269,6 +269,8 @@ namespace CS420Project3
             }
             return winner;
         }
+
+
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     class Program
@@ -284,7 +286,7 @@ namespace CS420Project3
             int computer;
             Console.WriteLine("Who is taking the first turn {Human(h) or Computer(c)}: ");
             input = Console.ReadLine();
-            if(input.ToUpper() == "C")
+            if (input.ToUpper() == "C")
             {
                 computer = 1;
                 human = 2;
@@ -298,14 +300,14 @@ namespace CS420Project3
                 human = 1;
             }
 
-            while(winner == 0)
+            while (winner == 0)
             {
                 testBoard.printBoard();
                 Console.Write("Please enter a space {A-H + 1-8 e.g. E5}: ");
                 opponentMove = Console.ReadLine();
                 testBoard.setPiece(human, opponentMove);
                 winner = testBoard.checkWin();
-                if(winner > 0)
+                if (winner > 0)
                     break;
                 computerMove = minimaxDecision(testBoard, computer);
                 testBoard.setPiece(computer, computerMove);
@@ -339,12 +341,15 @@ namespace CS420Project3
         public static bool bogoMove = false;
         //bogomove overrides all other moves
 
-        public static int debugMode = 1;
+        public static int debugMode = 2;
         //0 = no debug
         //1 = print search tree
         //2 = print decision overrides
 
         public static int depthLimit = 1;
+        //sets the depth of the search
+
+        public static int printDepthLimit = 10;
         //sets the depth of the search
 
         public static Random r = new Random();
@@ -358,18 +363,17 @@ namespace CS420Project3
             foreach (Coordinate space1 in nextSpaces)
             {
                 int thing = calcMin(board, space1, 0, player);
-                if (debugMode == 1) Console.WriteLine("Max " + space1.ToString() + " " + thing);
-
                 if (thing > max)
                 {
                     max = thing;
                     decision = Enum.GetName(typeof(Coordinates), space1.x) + (space1.y + 1);
-                    if (debugMode == 2 ) Console.WriteLine(max + " " + decision);
+                    if (debugMode == 2) Console.WriteLine(max + " " + decision);
                 }
             }
+            if (debugMode == 1) Console.WriteLine("MAX " + decision + " " + max);
             if (bogoMove) //random move from all valid moves chosen.  can be enabled if the ai is worse than a random number generator
             {
-                int lol =  r.Next(0, nextSpaces.Count-1);
+                int lol = r.Next(0, nextSpaces.Count - 1);
                 decision = Enum.GetName(typeof(Coordinates), nextSpaces[lol].x) + (nextSpaces[lol].y + 1);
             }
             return decision;
@@ -380,9 +384,8 @@ namespace CS420Project3
             int min = 100000;
             Board tempBoard = new Board(board);
             tempBoard.setPiece(player, space);
-            if(tempBoard.checkWin() > 0) return min * -1;
 
-            if(currentDepth <= depthLimit)
+            if (currentDepth <= depthLimit)
             {
                 List<Coordinate> nextSpaces = tempBoard.getNextSpaces();
                 foreach (Coordinate space1 in nextSpaces)
@@ -392,8 +395,8 @@ namespace CS420Project3
                 }
             }
             else
-                min = calculateScore(board, space, player);
-            if (debugMode == 1)
+                min = calculateScore(tempBoard, player);
+            if (debugMode == 1 && currentDepth <= printDepthLimit)
             {
                 string printBreak = "";
                 printBreak += "      ";
@@ -408,7 +411,6 @@ namespace CS420Project3
             int max = -100000;
             Board tempBoard = new Board(board);
             tempBoard.setPiece(player, space);
-            if (tempBoard.checkWin() > 0) return max * -1;
             if (currentDepth <= depthLimit)
             {
                 List<Coordinate> nextSpaces = tempBoard.getNextSpaces();
@@ -419,8 +421,8 @@ namespace CS420Project3
                 }
             }
             else
-                max = calculateScore(board, space, player);
-            if (debugMode == 1)
+                max = calculateScore(tempBoard, player);
+            if (debugMode == 1 && currentDepth <= printDepthLimit)
             {
                 string printBreak = "";
                 printBreak += "      ";
@@ -430,10 +432,8 @@ namespace CS420Project3
             return max;
         }
 
-        public static int calculateScore(Board board, Coordinate space, int player)
+        public static int calculateScore(Board board, int player)
         {
-            string tempSpace = Enum.GetName(typeof(Coordinates), space.x) + (space.y + 1);
-            board.testPiece(player, tempSpace);
             int[,] activeBoard = board.getBoard();
             int size = (int)(Math.Sqrt(activeBoard.Length));
             int opponent = 0;
@@ -443,78 +443,37 @@ namespace CS420Project3
             int count = 0;
 
             //determines opponent
-            opponent =  player == 1 ?  2 : 1;
+            opponent = player == 1 ? 2 : 1;
             // Horizontal check
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
                 {
-                    if (activeBoard[i,j] == player && lastPiece == player)
+                    if (activeBoard[i, j] == player && lastPiece == player)
                         count++;
-                    else if (activeBoard[i,j] == opponent && lastPiece == opponent)
+                    else if (activeBoard[i, j] == opponent && lastPiece == opponent)
                         count++;
-                    else if (activeBoard[i,j] == 0)
-                    {
-                        if(lastPiece == player)
-                            playerTotal += (int)Math.Pow(10, count);
-                        else if(lastPiece == opponent)
-                            opponentTotal += (int)Math.Pow(10, count) + 1;
-                        count = 0;
-                    }
-                    else if (activeBoard[i,j] == player && lastPiece == opponent)
-                    {
-                        playerTotal += (int)Math.Pow(10, count);
-                        count = 1;
-                    }
-                    else if (activeBoard[i,j] == opponent && lastPiece == player)
-                    {
-                        opponentTotal += (int)Math.Pow(10, count) + 1;
-                        count = 1;
-                    }
-                    else if((activeBoard[i,j] == player || activeBoard[i,j] == opponent) && lastPiece == 0)
-                        count = 1;
-                    lastPiece = activeBoard[i, j];
-                }
-
-                if (lastPiece == player)
-                    playerTotal += (int)Math.Pow(10, count);
-                else if (lastPiece == opponent)
-                    opponentTotal += (int)Math.Pow(10, count) + 1;
-                count = 0;
-            }
-            lastPiece = 0;
-
-            //Vertical check
-            for (int i = 0; i < size; i++)
-            {
-                for (int j = 0; j < size; j++)
-                {
-                    if (activeBoard[j,i] == player && lastPiece == player)
-                        count++;
-                    else if (activeBoard[j,i] == opponent && lastPiece == opponent)
-                        count++;
-                    else if (activeBoard[j,i] == 0)
+                    else if (activeBoard[i, j] == 0)
                     {
                         if (lastPiece == player)
                             playerTotal += (int)Math.Pow(10, count);
                         else if (lastPiece == opponent)
-                            opponentTotal += (int)Math.Pow(10, count) + 1;
+                            opponentTotal += (int)Math.Pow(10, count);
                         count = 0;
                     }
-
-                    else if (activeBoard[j,i] == player && lastPiece == opponent)
+                    else if (activeBoard[i, j] == player && lastPiece == opponent)
+                    {
+                        opponentTotal += (int)Math.Pow(10, count);
+                        count = 1;
+                    }
+                    else if (activeBoard[i, j] == opponent && lastPiece == player)
                     {
                         playerTotal += (int)Math.Pow(10, count);
                         count = 1;
                     }
-                    else if (activeBoard[j, i] == opponent && lastPiece == player)
-                    {
-                        opponentTotal += (int)Math.Pow(10, count) + 1;
+                    else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
                         count = 1;
-                    }
-                    else if ((activeBoard[j,i] == player || activeBoard[j,i] == opponent) && lastPiece == 0)
-                        count = 1;
-                    lastPiece = activeBoard[j, i];
+                    lastPiece = activeBoard[i, j];
                 }
 
                 if (lastPiece == player)
@@ -523,7 +482,128 @@ namespace CS420Project3
                     opponentTotal += (int)Math.Pow(10, count);
                 count = 0;
             }
-            board.removePiece(tempSpace);
+            lastPiece = 0;
+
+            // Horizontal check2
+            for (int i = size - 1; i >= 0; i--)
+            {
+                for (int j = size - 1; j >= 0; j--)
+                {
+                    if (activeBoard[i, j] == player && lastPiece == player)
+                        count++;
+                    else if (activeBoard[i, j] == opponent && lastPiece == opponent)
+                        count++;
+                    else if (activeBoard[i, j] == 0)
+                    {
+                        if (lastPiece == player)
+                            playerTotal += (int)Math.Pow(10, count);
+                        else if (lastPiece == opponent)
+                            opponentTotal += (int)Math.Pow(10, count);
+                        count = 0;
+                    }
+                    else if (activeBoard[i, j] == player && lastPiece == opponent)
+                    {
+                        opponentTotal += (int)Math.Pow(10, count);
+                        count = 1;
+                    }
+                    else if (activeBoard[i, j] == opponent && lastPiece == player)
+                    {
+                        playerTotal += (int)Math.Pow(10, count);
+                        count = 1;
+                    }
+                    else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
+                        count = 1;
+                    lastPiece = activeBoard[i, j];
+                }
+
+                if (lastPiece == player)
+                    playerTotal += (int)Math.Pow(10, count);
+                else if (lastPiece == opponent)
+                    opponentTotal += (int)Math.Pow(10, count);
+                count = 0;
+            }
+            lastPiece = 0;
+
+            //Vertical check
+            for (int j = 0; j < size; j++)
+            {
+                for (int i = 0; i < size; i++)
+                {
+                    if (activeBoard[i, j] == player && lastPiece == player)
+                        count++;
+                    else if (activeBoard[i, j] == opponent && lastPiece == opponent)
+                        count++;
+                    else if (activeBoard[i, j] == 0)
+                    {
+                        if (lastPiece == player)
+                            playerTotal += (int)Math.Pow(10, count);
+                        else if (lastPiece == opponent)
+                            opponentTotal += (int)Math.Pow(10, count);
+                        count = 0;
+                    }
+                    else if (activeBoard[i, j] == player && lastPiece == opponent)
+                    {
+                        opponentTotal += (int)Math.Pow(10, count);
+                        count = 1;
+                    }
+                    else if (activeBoard[i, j] == opponent && lastPiece == player)
+                    {
+                        playerTotal += (int)Math.Pow(10, count);
+                        count = 1;
+                    }
+                    else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
+                        count = 1;
+                    lastPiece = activeBoard[i, j];
+                }
+
+                if (lastPiece == player)
+                    playerTotal += (int)Math.Pow(10, count);
+                else if (lastPiece == opponent)
+                    opponentTotal += (int)Math.Pow(10, count);
+                count = 0;
+            }
+            lastPiece = 0;
+
+            //Vertical check2
+            for (int j = size - 1; j >= 0; j--)
+            {
+                for (int i = size - 1; i >= 0; i--)
+                {
+                    if (activeBoard[i, j] == player && lastPiece == player)
+                        count++;
+                    else if (activeBoard[i, j] == opponent && lastPiece == opponent)
+                        count++;
+                    else if (activeBoard[i, j] == 0)
+                    {
+                        if (lastPiece == player)
+                            playerTotal += (int)Math.Pow(10, count);
+                        else if (lastPiece == opponent)
+                            opponentTotal += (int)Math.Pow(10, count);
+                        count = 0;
+                    }
+                    else if (activeBoard[i, j] == player && lastPiece == opponent)
+                    {
+                        opponentTotal += (int)Math.Pow(10, count);
+                        count = 1;
+                    }
+                    else if (activeBoard[i, j] == opponent && lastPiece == player)
+                    {
+                        playerTotal += (int)Math.Pow(10, count);
+                        count = 1;
+                    }
+                    else if ((activeBoard[i, j] == player || activeBoard[i, j] == opponent) && lastPiece == 0)
+                        count = 1;
+                    lastPiece = activeBoard[i, j];
+                }
+
+                if (lastPiece == player)
+                    playerTotal += (int)Math.Pow(10, count);
+                else if (lastPiece == opponent)
+                    opponentTotal += (int)Math.Pow(10, count);
+                count = 0;
+            }
+            lastPiece = 0;
+
             //Console.WriteLine("Heuristics:\n" + playerTotal + " " + opponentTotal);
             return playerTotal - opponentTotal;
         }
