@@ -286,6 +286,7 @@ namespace CS420Project3
             string opponentMove;
             int human;
             int computer;
+            bool success = false;
             Console.WriteLine("Who is taking the first turn {Human(h) or Computer(c)}: ");
             input = Console.ReadLine();
             if (input.ToUpper() == "C")
@@ -307,7 +308,14 @@ namespace CS420Project3
                 testBoard.printBoard();
                 Console.Write("Please enter a space {A-H + 1-8 e.g. E5}: ");
                 opponentMove = Console.ReadLine();
-                testBoard.setPiece(human, opponentMove);
+                success = testBoard.setPiece(human, opponentMove);
+                while(!success)
+                {
+                    Console.WriteLine("Invalid move - space already taken");
+                    Console.Write("Please enter a space {A-H + 1-8 e.g. E5}: ");
+                    opponentMove = Console.ReadLine();
+                    success = testBoard.setPiece(human, opponentMove);
+                }
                 winner = testBoard.checkWin();
                 if (winner > 0)
                     break;
